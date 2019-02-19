@@ -10,6 +10,7 @@ struct integral_constant {
     typedef T value_type;
     typedef integral_constant<T, v> type;
     constexpr operator value_type() { return value; }
+    constexpr value_type operator()() const noexcept { return value; }
 };
 
 template <bool _b>
@@ -90,6 +91,8 @@ template <typename Tp> struct is_trivally_move_assignable
     : __type_traits<Tp>::has_trivally_move_assignable {};
 template <typename Tp> struct is_trivally_destructible 
     : __type_traits<Tp>::has_trivally_destructible {};
+
+    
 } // namespace tbSTL
 
 #endif // __TB_TYPE_TRAITS_H_

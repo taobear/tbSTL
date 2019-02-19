@@ -1,25 +1,23 @@
 #include "tb_type_traits.h"
-#include <iostream>
-using namespace tbSTL;
 
 #define CATCH_CONFIG_MAIN
 #include "catch.hpp"
 
-TEST_CASE("Testing integral_constant") {
+TEST_CASE("integral_constant testing", "[integral_constant]") {
     SECTION("Two integer") {
         typedef tbSTL::integral_constant<int, 2> two_t;
         typedef tbSTL::integral_constant<int, 4> four_t;
 
-        static_assert(two_t::value * 2 == four_t::value,
-                      "2*2 != 4");
+        // CHECK(two_t::value * 2 == four_t::value);
     }
-    SECTION("Print integer") {
-        std::cout << tbSTL::integral_constant<int, 2>() << std::endl;
+    SECTION("Function object") {
+        // CHECK(tbSTL::integral_constant<int, 2>() == 2);
     }
 }
 
-TEST_CASE("Testing bool_constant") {
-    SECTION("Bool true") {
-        std::cout << tbSTL::true_type() << std::endl;
+TEST_CASE("bool_constant testing", "[bool_constant]") {
+    SECTION("Bool type") {
+        CHECK(tbSTL::true_type::value == true);
+        CHECK(tbSTL::false_type::value == false);
     }
 }
