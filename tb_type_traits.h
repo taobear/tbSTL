@@ -13,6 +13,9 @@ struct integral_constant {
     constexpr value_type operator()() const noexcept { return value; }
 };
 
+template <class T, T v> 
+constexpr T integral_constant<T, v>::value;
+
 template <bool _b>
 using __bool_constant = integral_constant<bool, _b>;
 
