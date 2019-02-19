@@ -83,19 +83,64 @@ __TB_TRIVALLY_TYPE_PARTIAL_DECLAR(Tp, Tp*);
 
 
 template <typename Tp> struct is_trivally_default_constructible 
-    : __type_traits<Tp>::has_trivally_default_constructible {};
+    : public __type_traits<Tp>::has_trivally_default_constructible {};
 template <typename Tp> struct is_trivally_copy_constructible
-    : __type_traits<Tp>::has_trivally_copy_constructible {};
+    : public __type_traits<Tp>::has_trivally_copy_constructible {};
 template <typename Tp> struct is_trivally_move_constructible
-    : __type_traits<Tp>::has_trivally_move_constructible {};
+    : public __type_traits<Tp>::has_trivally_move_constructible {};
 template <typename Tp> struct is_trivally_copy_assignable 
-    : __type_traits<Tp>::has_trivally_copy_assignable {};
+    : public __type_traits<Tp>::has_trivally_copy_assignable {};
 template <typename Tp> struct is_trivally_move_assignable
-    : __type_traits<Tp>::has_trivally_move_assignable {};
+    : public __type_traits<Tp>::has_trivally_move_assignable {};
 template <typename Tp> struct is_trivally_destructible 
-    : __type_traits<Tp>::has_trivally_destructible {};
+    : public __type_traits<Tp>::has_trivally_destructible {};
 
-    
+template <typename Tp> struct remove_const {
+    typedef Tp type;
+};
+template <typename Tp> struct remove_const<const Tp> {
+    typedef Tp type;
+};
+
+template <typename Tp> struct remove_volatile {
+    typedef Tp type;
+};
+template <typename Tp> struct remove_volatile<volatile Tp> {
+    typedef Tp type;
+};
+
+template <typename Tp> struct remove_cv {
+    typedef typename 
+        remove_const<remove_volatile<Tp>::type>::type type;
+};
+
+template <typename Tp>  struct __is_void_helper : public false_type {};
+template <> struct __is_void_helper<void> : public true_type {};
+template <typename Tp> struct is_void 
+    : public __is_void_helper<remove_cv<Tp>::type> {};
+
+template <typename Tp> struct __is_integral_helper : public false_type {};
+template <> struct __is_integral_helper<bool> : public true_type {};
+template <> struct __is_integral_helper<char> : public true_type {};
+template <> struct __is_integral_helper<unsigned char> : public true_type {};
+template <> struct __is_integral_helper<wchar_t> : public true_type {};
+template <> struct __is_integral_helper<short> : public true_type {};
+template <> struct __is_integral_helper<unsigned short> : public true_type {};
+template <> struct __is_integral_helper<int> : public true_type {};
+template <> struct __is_integral_helper<unsigned int> : public true_type {};
+template <> struct __is_integral_helper<long> : public true_type {};
+template <> struct __is_integral_helper<unsigned long> : public true_type {};
+template <> struct __is_integral_helper<long long> : public true_type {};
+template <> struct __is_integral_helper<unsigned long long> : public true_type {};
+
+template <typename Tp> struct is_integral
+    : public __is_integral_helper<remove_cv<Tp>::type> {};
+
+template <typename Tp1, typename Tp2>
+struct is_same : public false_type {};
+template <typename Tp>
+struct is_same<Tp, Tp> : public true_type {};
+
 } // namespace tbSTL
 
 #endif // __TB_TYPE_TRAITS_H_
