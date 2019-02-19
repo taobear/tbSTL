@@ -94,6 +94,8 @@ template <typename Tp> struct is_trivally_move_assignable
     : __type_traits<Tp>::has_trivally_move_assignable {};
 template <typename Tp> struct is_trivally_destructible 
     : __type_traits<Tp>::has_trivally_destructible {};
+
+    
 } // namespace tbSTL
 
 #endif // __TB_TYPE_TRAITS_H_
