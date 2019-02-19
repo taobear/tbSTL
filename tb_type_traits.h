@@ -9,7 +9,8 @@ struct integral_constant {
     static constexpr T value = v;
     typedef T value_type;
     typedef integral_constant<T, v> type;
-    constexpr operator value_type() { return value; }
+    constexpr operator value_type() const noexcept { return value; }
+    constexpr value_type operator()() const noexcept { return value; }
 };
 
 template <bool _b>

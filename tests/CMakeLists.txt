@@ -1,0 +1,1 @@
+add_executable(test_tb_type_traits ./test_tb_type_traits.cpp)
