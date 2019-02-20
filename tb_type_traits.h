@@ -111,13 +111,13 @@ template <typename Tp> struct remove_volatile<volatile Tp> {
 
 template <typename Tp> struct remove_cv {
     typedef typename 
-        remove_const<remove_volatile<Tp>::type>::type type;
+        remove_const<typename remove_volatile<Tp>::type>::type type;
 };
 
 template <typename Tp>  struct __is_void_helper : public false_type {};
 template <> struct __is_void_helper<void> : public true_type {};
 template <typename Tp> struct is_void 
-    : public __is_void_helper<remove_cv<Tp>::type> {};
+    : public __is_void_helper<typename remove_cv<Tp>::type> {};
 
 template <typename Tp> struct __is_integral_helper : public false_type {};
 template <> struct __is_integral_helper<bool> : public true_type {};
@@ -134,7 +134,7 @@ template <> struct __is_integral_helper<long long> : public true_type {};
 template <> struct __is_integral_helper<unsigned long long> : public true_type {};
 
 template <typename Tp> struct is_integral
-    : public __is_integral_helper<remove_cv<Tp>::type> {};
+    : public __is_integral_helper<typename remove_cv<Tp>::type> {};
 
 template <typename Tp1, typename Tp2>
 struct is_same : public false_type {};
