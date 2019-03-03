@@ -1,5 +1,5 @@
-#ifndef __TB_RELOPS_H
-#define __TB_RELOPS_H
+#ifndef __TB_RELOPS_H_
+#define __TB_RELOPS_H_
 
 namespace tbSTL {
 namespace rel_ops {
@@ -28,4 +28,4 @@ inline bool operator>=(const T& lhs, const T& rhs) {
 
 } // namespace tbSTL
 
-#endif // __TB_RELOPS_H
+#endif // __TB_RELOPS_H_

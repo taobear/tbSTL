@@ -1,9 +1,5 @@
-//
-// Created by taobear on 2018/8/17.
-//
-
-#ifndef TBSTL_TB_RVAL_H
-#define TBSTL_TB_RVAL_H
+#ifndef __TB_RVAL_H_
+#define __TB_RVAL_H_
 
 namespace tbSTL {
 
@@ -37,4 +33,4 @@ remove_reference_t<Tp>&& move(Tp&& t) noexcept {
 
 } // namespace tbSTL
 
-#endif //TBSTL_TB_RVAL_H
+#endif // __TB_RVAL_H_

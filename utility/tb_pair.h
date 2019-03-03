@@ -1,5 +1,5 @@
-#ifndef __TB_PAIR_H
-#define __TB_PAIR_H
+#ifndef __TB_PAIR_H_
+#define __TB_PAIR_H_
 
 namespace tbSTL {
 
@@ -80,4 +80,4 @@ pair<T1, T2> make_pair(const T1& t1, const T2& t2) {
 
 } // namespace tbSTL
 
-#endif // __TB_PAIR_H
+#endif // __TB_PAIR_H_
