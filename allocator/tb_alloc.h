@@ -138,6 +138,120 @@ __default_alloc::obj * volatile
 __default_alloc::free_list[__NFREELISTS] = 
 {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0};
 
+void *__default_alloc::allocate(size_t n)
+{
+    if (n >= __MAX_BYTES) {
+        return __malloc_alloc::allocate(n);
+    }
+
+    obj * volatile *my_free_list;
+    obj *result;
+
+    my_free_list = free_list + FREELIST_INDEX(n);
+    result = *my_free_list;
+    if (result == nullptr) {
+        return refill(n);
+    }
+    
+    *my_free_list = result->free_list_link;
+    return result;
+}
+
+void *__default_alloc::reallocate(void *p, size_t old_sz, size_t new_sz)
+{
+
+}
+
+void __default_alloc::deallocate(void *p, size_t n)
+{
+    if (n >= __MAX_BYTES) {
+        return __malloc_alloc::deallocate(p, n);
+    }
+
+    obj *volatile *my_free_list;
+    obj *q = (obj *)p;
+
+    my_free_list = free_list + FREELIST_INDEX(n);
+    q->free_list_link = *my_free_list;
+    *my_free_list = q;        
+}
+
+void *__default_alloc::refill(size_t n)
+{
+    int nobjs = 20;
+    obj * volatile * my_free_list;
+    obj *result;
+    obj *next_obj, *current_obj;
+    char *chunk = chunk_alloc(n, nobjs);
+
+    if (nobjs == 1) {
+        return chunk;
+    }
+
+    my_free_list = free_list + FREELIST_INDEX(n);
+    result = (obj *)chunk;
+    *my_free_list = next_obj = (obj *)(chunk + n);
+
+    for (int i = 1; ; i++) {
+        current_obj = next_obj;
+        next_obj = (obj *)((char*)next_obj + n);
+        if (i == nobjs - 1) {
+            current_obj->free_link_list = next_obj;
+        } else {
+            current_obj->free_link_list = nullptr;
+        }
+    }
+    return result;
+}
+
+void *__default_alloc::chunk_alloc(size_t n, int &nobjs) 
+{
+    char *result;
+    size_t total_bytes = n * nobjs;
+    size_t left_bytes = end_free - start_free;
+
+    if (left_bytes >= total_bytes) {
+        result = start_free;
+        start_free += total_bytes;
+        return result;
+    } else if (left_bytes >= n) {
+        nobjs = left_bytes / n;
+        total_bytes = n * nobjs;
+        result = start_free;
+        start_free += total_bytes;
+        return result;
+    } else {
+        size_t bytes_to_get = 2 * total_bytes + ROUND_UP(heap_size >> 4);
+        if (left_bytes > 0) {
+            obj * volatile * my_free_list = free_list + FREELIST_INDEX(left_bytes);
+            ((obj *)start_free) -> free_list_link = *my_free_list;
+            *my_free_list = (obj *)start_free;
+        }
+
+        start_free = (char *)malloc(bytes_to_get);
+        if (start_free == 0) {
+            int i;
+            obj * volatile * my_free_list, *p;
+            for ( i = n; i <= __MAX_BYTES; i += __ALIGN) {
+                my_free_list = free_list + FREELIST_INDEX(i);
+                p = *my_free_list;
+                if (p != 0) {
+                    *my_free_list = p->free_list_link;
+                    start_free = (char *)p;
+                    end_free = start_free + i;
+                    return chunk_alloc(n, nobjs);
+                }
+            }
+            end_free = 0;
+            start_free = (char *)malloc_alloc::allocate(bytes_to_get);
+        }
+
+        heap_size += bytes_to_get;
+        end_free = start_free + bytes_to_get;
+        return chunk_alloc(size, nobjs);
+    }
+}
+
 } // namespace tbSTL
 
 #endif // __BT_ALLOC_H_
