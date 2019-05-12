@@ -1,7 +1,0 @@
-[
-{
-  "directory": "F:/MyRep/tbSTL/build/tests",
-  "command": "C:\\mingw64\\bin\\g++.exe   @CMakeFiles/test_tb_type_traits.dir/includes_CXX.rsp  -g -g   -std=gnu++14 -o CMakeFiles\\test_tb_type_traits.dir\\test_tb_type_traits.cpp.obj -c F:\\MyRep\\tbSTL\\tests\\test_tb_type_traits.cpp",
-  "file": "F:/MyRep/tbSTL/tests/test_tb_type_traits.cpp"
-}
-]
