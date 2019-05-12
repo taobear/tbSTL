@@ -1,0 +1,5 @@
+F:/MyRep/tbSTL/build/CMakeFiles/edit_cache.dir
+F:/MyRep/tbSTL/build/CMakeFiles/rebuild_cache.dir
+F:/MyRep/tbSTL/build/tests/CMakeFiles/test_tb_type_traits.dir
+F:/MyRep/tbSTL/build/tests/CMakeFiles/edit_cache.dir
+F:/MyRep/tbSTL/build/tests/CMakeFiles/rebuild_cache.dir

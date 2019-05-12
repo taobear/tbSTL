@@ -25,7 +25,7 @@ public:
     back_insert_iterator<container_type> &operator*() { return *this; }
     back_insert_iterator<container_type> &operator++() { return *this; }
     back_insert_iterator<container_type> &operator++(int) { return *this; }
-  protected:
+protected:
     container_type *container;
 };
 
@@ -42,7 +42,7 @@ public:
     typedef void                value_type;
     typedef void                difference_type;
     typedef void                pointer;
-    typedef void                refernce;
+    typedef void                reference;
 
     explicit front_insert_iterator(container_type &x) : container(&x) {}
     front_insert_iterator<container_type> &
