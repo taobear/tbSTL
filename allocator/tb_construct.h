@@ -13,7 +13,7 @@ inline void construct(T1 *pointer, const T2& val) {
 template <class T>
 inline void destroy(T *pointer) {
     pointer->~T();
-}
+} 
 
 template <class ForwardIter>
 inline void __destroy_aux(ForwardIter first, ForwardIter last, true_type) {

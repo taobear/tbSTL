@@ -15,7 +15,7 @@ template <class Category, class Tp, class Distance = std::ptrdiff_t,
           class Pointer = Tp*, class Reference = Tp&>
 struct iterator {
     typedef Category  iterator_category;
-    typedef T         value_type;
+    typedef Tp        value_type;
     typedef Distance  difference_type;
     typedef Pointer   pointer;
     typedef Reference reference;

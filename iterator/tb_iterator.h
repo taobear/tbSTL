@@ -55,7 +55,7 @@ public:
     front_insert_iterator<container_type> &operator++() { return *this; }
     front_insert_iterator<container_type> &operator++(int) { return *this; }
 
-  protected:
+protected:
     container_type *container;
 };
 
@@ -72,7 +72,7 @@ public:
     typedef void                value_type;
     typedef void                difference_type;
     typedef void                pointer;
-    typedef void                reference_type;
+    typedef void                reference;
 
     insert_iterator(Container &x, typename container_type::iterator i)
         : container(&x), iter(i) {}
@@ -86,7 +86,7 @@ public:
     insert_iterator<container_type> &operator*() { return *this; }
     insert_iterator<container_type> &operator++() { return *this; }
     insert_iterator<container_type> &operator++(int) { return *this; }
-  protected:
+protected:
     container_type *container;
     typename container_type::iterator iter;
 };
@@ -94,7 +94,7 @@ public:
 template <class Container, class Iterator>
 inline insert_iterator<Container> inserter(Container& _x, Iterator _i) {
     typedef typename Container::iterator iterator_type;
-    return insert_iterator(_x, iterator_type(_i));
+    return insert_iterator<Container>(_x, iterator_type(_i));
 }
 
 template <class Iterator>
@@ -152,14 +152,14 @@ public:
     _Self operator+(difference_type n) const {
         return _Self(current - n);
     }
-    _Self& operator+=(difference_type n) const {
+    _Self& operator+=(difference_type n) {
         current -= n;
         return *this;
     }
     _Self operator-(difference_type n) const {
         return _Self(current + n);
     }
-    _Self& operator-=(difference_type n) const {
+    _Self& operator-=(difference_type n) {
         current += n;
         return *this;
     }
