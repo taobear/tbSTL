@@ -2,6 +2,7 @@
 #define __TB_ALLOC_H_
 
 #include <cstdlib>
+#include <cstring>
 #include <assert.h>
 
 namespace tbSTL {
@@ -10,10 +11,10 @@ template <class Tp, class Alloc>
 class simple_alloc {
 public:
     static Tp *allocate(size_t n) { 
-        return 0 == n ? 0 : (T*)Alloc::allocate(n*sizeof(Tp)); 
+        return 0 == n ? 0 : (Tp*)Alloc::allocate(n*sizeof(Tp));
     }
     static Tp *allocate() {
-        return (T*)Alloc::allocate(sizeof(Tp));
+        return (Tp*)Alloc::allocate(sizeof(Tp));
     } 
     static void deallocate(Tp *p, size_t n) {
         if (0 != n) { Alloc::deallocate(p, n * sizeof(Tp)); }
@@ -79,7 +80,7 @@ void *__malloc_alloc::oom_malloc(size_t n)
         my_alloc_handler = oom_handler;
         assert(my_alloc_handler != 0);
         my_alloc_handler();
-        result = malloc(n);
+        result = std::malloc(n);
         if (result) return result;
     }
 }
@@ -106,10 +107,11 @@ public:
     static void *allocate(size_t n);
     static void *reallocate(void *p, size_t old_sz, size_t new_sz);
     static void deallocate(void *p, size_t n);
+
 private: 
    union obj {
         union obj * free_list_link;
-        char client_data[];
+        char *client_data;
     };
     static obj * volatile free_list[__NFREELISTS];
     
@@ -121,9 +123,11 @@ private:
         return ((bytes + __ALIGN - 1) / __ALIGN - 1);
     }
 
+    static size_t get_list_num(size_t n);
+
 private:
     static void *refill(size_t n);
-    static char *chunk_alloc(size_t size, int &nobjs);
+    static char* chunk_alloc(size_t size, int &nobjs);
 
     static char *start_free;
     static char *end_free;
@@ -159,13 +163,28 @@ void *__default_alloc::allocate(size_t n)
 
 void *__default_alloc::reallocate(void *p, size_t old_sz, size_t new_sz)
 {
+    void *result;
+    size_t copy_sz;
 
+    if (old_sz > (size_t) __MAX_BYTES && new_sz > (size_t) __MAX_BYTES) {
+        return __malloc_alloc::reallocate(p, old_sz, new_sz);
+    }
+
+    if (ROUND_UP(old_sz) == ROUND_UP(new_sz)) {
+        return p;
+    }
+
+    result = allocate(new_sz);
+    copy_sz = new_sz > old_sz ? old_sz : new_sz;
+    std::memcpy(result, p, copy_sz);
+    deallocate(p, old_sz);
+    return result;
 }
 
 void __default_alloc::deallocate(void *p, size_t n)
 {
     if (n >= __MAX_BYTES) {
-        return __malloc_alloc::deallocate(p, n);
+        __malloc_alloc::deallocate(p, n);
     }
 
     obj *volatile *my_free_list;
@@ -179,32 +198,34 @@ void __default_alloc::deallocate(void *p, size_t n)
 void *__default_alloc::refill(size_t n)
 {
     int nobjs = 20;
+    size_t obj_size = ROUND_UP(n);
+
     obj * volatile * my_free_list;
     obj *result;
     obj *next_obj, *current_obj;
-    char *chunk = chunk_alloc(n, nobjs);
+    char *chunk = chunk_alloc(obj_size, nobjs);
 
     if (nobjs == 1) {
         return chunk;
     }
 
-    my_free_list = free_list + FREELIST_INDEX(n);
-    result = (obj *)chunk;
-    *my_free_list = next_obj = (obj *)(chunk + n);
+    my_free_list = free_list + FREELIST_INDEX(obj_size);
+    result = (obj *)chunk; // 第一个节点返回
+    *my_free_list = next_obj = (obj *)(chunk + obj_size); // 后续资源挂在链中
 
-    for (int i = 1; ; i++) {
+    for (int i = 1; i < nobjs; i++) {
         current_obj = next_obj;
-        next_obj = (obj *)((char*)next_obj + n);
-        if (i == nobjs - 1) {
-            current_obj->free_link_list = next_obj;
+        next_obj = (obj *)((char *)next_obj + obj_size);
+        if (i != nobjs - 1) {
+            current_obj->free_list_link = next_obj;
         } else {
-            current_obj->free_link_list = nullptr;
+            current_obj->free_list_link = nullptr;
         }
     }
     return result;
 }
 
-void *__default_alloc::chunk_alloc(size_t n, int &nobjs) 
+char *__default_alloc::chunk_alloc(size_t n, int &nobjs)
 {
     char *result;
     size_t total_bytes = n * nobjs;
@@ -221,13 +242,15 @@ void *__default_alloc::chunk_alloc(size_t n, int &nobjs)
         start_free += total_bytes;
         return result;
     } else {
-        size_t bytes_to_get = 2 * total_bytes + ROUND_UP(heap_size >> 4);
+        // 将池子中的资源挂到链上
         if (left_bytes > 0) {
             obj * volatile * my_free_list = free_list + FREELIST_INDEX(left_bytes);
             ((obj *)start_free) -> free_list_link = *my_free_list;
             *my_free_list = (obj *)start_free;
         }
 
+        // 尝试分配 bytes_to_get 大小的资源
+        size_t bytes_to_get = 2 * total_bytes + ROUND_UP(heap_size >> 4);
         start_free = (char *)malloc(bytes_to_get);
         if (start_free == 0) {
             int i;
@@ -243,13 +266,27 @@ void *__default_alloc::chunk_alloc(size_t n, int &nobjs)
                 }
             }
             end_free = 0;
-            start_free = (char *)malloc_alloc::allocate(bytes_to_get);
+            start_free = (char *)__malloc_alloc::allocate(bytes_to_get);
         }
 
         heap_size += bytes_to_get;
         end_free = start_free + bytes_to_get;
-        return chunk_alloc(size, nobjs);
+        return chunk_alloc(n, nobjs);
     }
+}
+
+size_t __default_alloc::get_list_num(size_t n)
+{
+    obj *volatile *my_free_list = free_list + FREELIST_INDEX(n);
+    obj *p = *my_free_list;
+
+    size_t result = 0;
+    while (p != nullptr) {
+        p = p->free_list_link;
+        result++;
+    }
+
+    return result;
 }
 
 } // namespace tbSTL
