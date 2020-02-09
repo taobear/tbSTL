@@ -16,9 +16,8 @@ inline void destroy(T *pointer) {
 } 
 
 template <class ForwardIter>
-inline void __destroy_aux(ForwardIter first, ForwardIter last, true_type) {
+inline void __destroy_aux(ForwardIter first, ForwardIter last, true_type) {}
 
-}
 template <class ForwardIter>
 inline void __destroy_aux(ForwardIter first, ForwardIter last, false_type) {
     for ( ; first != last; ++first) {
