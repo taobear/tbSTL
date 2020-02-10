@@ -1,0 +1,1 @@
+add_executable(test_tb_algobase test/test_tb_algobase.cpp)

@@ -3,6 +3,7 @@
 
 #include <cstring>
 
+#include "tb_type_traits.h"
 #include "iterator/tb_iterator.h"
 
 namespace tbSTL {
@@ -53,7 +54,7 @@ struct __copy_dispatch {
 };
 
 template <class Tp> 
-struct __copy_dispatch <Tp, Tp> {
+struct __copy_dispatch<Tp*, Tp*> {
     Tp *operator()(Tp *first, Tp *last, Tp *result) {
         return _copy_pod_type(first, last, result,
                               tbSTL::is_trivally_copy_assignable<Tp>());
@@ -61,7 +62,7 @@ struct __copy_dispatch <Tp, Tp> {
 };
 
 template <class Tp> 
-struct __copy_dispatch <const Tp, Tp> {
+struct __copy_dispatch<const Tp*, Tp*> {
     Tp* operator()(const Tp* first, const Tp* last, Tp* result) {
         return _copy_pod_type(first, last, result,
                               tbSTL::is_trivally_copy_assignable<Tp>());

@@ -12,14 +12,14 @@ namespace tbSTL {
 
 template <class InputIter, class ForwardIter>
 inline ForwardIter __uninitialized_copy_aux(InputIter first, InputIter last, ForwardIter result, 
-                                            true_type)
+                                            false_type)
 {
     return tbSTL::copy(first, last, result);
 }
 
 template <class InputIter, class ForwardIter>
 inline ForwardIter __uninitialized_copy_aux(InputIter first, InputIter last, ForwardIter result,
-                                            false_type)
+                                            true_type)
 {
     ForwardIter cur = first;
     for ( ; first != last; ++first, ++cur) {
